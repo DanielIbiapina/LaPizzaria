@@ -1,0 +1,34 @@
+{
+  "name": "lapizzaria",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DanielIbiapina/LaPizzaria.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DanielIbiapina/LaPizzaria/issues"
+  },
+  "homepage": "https://github.com/DanielIbiapina/LaPizzaria#readme",
+  "devDependencies": {
+    "@types/express": "^4.17.15",
+    "@types/pg": "^8.6.6",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.4"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "joi": "^17.7.0",
+    "pg": "^8.8.0"
+  }
+}
