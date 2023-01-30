@@ -1,6 +1,6 @@
-import { connectionDB } from "../database/db.js";
 import { Request, Response } from "express";
 import { QueryResult } from "pg";
+import prisma from "../database/db";
 
 type OrderType = {
   client: {
@@ -34,30 +34,40 @@ export async function postOrder(req: Request, res: Response) {
     totalPrice: number;
   } = req.body;
 
-  const clientIdExiste: QueryResult = await connectionDB.query(
-    "SELECT id FROM clients WHERE id=$1;",
-    [clientId]
-  );
+  const clientIdExiste = prisma.clients.findFirst({
+    where: {
+      id: clientId,
+    },
+  });
 
-  if (clientIdExiste.rowCount === 0) {
+  if (!clientIdExiste) {
     res.status(404).send("Esse cliente não existe!");
     return;
   }
 
-  const pizzaIdExiste: QueryResult = await connectionDB.query(
-    "SELECT id FROM pizzas WHERE id=$1;",
-    [pizzaId]
-  );
+  const pizzaIdExiste = prisma.pizzas.findFirst({
+    where: {
+      id: pizzaId,
+    },
+  });
 
-  if (pizzaIdExiste.rowCount === 0) {
-    res.status(404).send("Esse bolo não existe!");
+  if (!pizzaIdExiste) {
+    res.status(404).send("Esse cliente não existe!");
     return;
   }
 
-  await connectionDB.query(
+  /*await connectionDB.query(
     'INSERT INTO orders ("clientId", "pizzaId", "quantity", "totalPrice") VALUES ($1, $2, $3, $4);',
     [clientId, pizzaId, quantity, totalPrice]
-  );
+  );*/
+  await prisma.orders.create({
+    data: {
+      clientId,
+      pizzaId,
+      quantity,
+      totalPrice,
+    },
+  });
   res.sendStatus(201);
 }
 
@@ -68,15 +78,19 @@ export async function getOrders(req: Request, res: Response) {
     const ordersArray: OrderType[] = [];
     let objeto: OrderType;
     let orders: QueryResult;
+    const dataClients = await prisma.clients.findMany();
+    const dataPizzas = await prisma.pizzas.findMany();
+    const dataOrders = await prisma.orders.findMany();
     if (date) {
-      orders = await connectionDB.query(
+      /*orders = await connectionDB.query(
         `SELECT clients.*, pizzas.*, clients.id AS "clientId", clients.name AS "clientName", pizzas.*, orders.id AS "orderId", orders."createdAt", orders.quantity, orders."totalPrice" FROM orders JOIN clients ON orders."clientId" = clients.id JOIN pizzas ON orders."pizzaId" = pizzas.id WHERE orders."createdAt"::date = $1;`,
         [date]
       );
+      */
     } else {
-      orders = await connectionDB.query(
+      /*orders = await connectionDB.query(
         'SELECT clients.*, pizzas.*, clients.id AS "clientId", clients.name AS "clientName", pizzas.*, orders.id AS "orderId", orders."createdAt", orders.quantity, orders."totalPrice" FROM orders JOIN clients ON orders."clientId" = clients.id JOIN pizzas ON orders."pizzaId" = pizzas.id;'
-      );
+      );*/
     }
     for (let count = 0; count < orders.rowCount; count++) {
       objeto = {
@@ -113,12 +127,17 @@ export async function getOrders(req: Request, res: Response) {
 export async function getOrdersById(req: Request, res: Response) {
   const { id } = req.params;
 
-  const orderIdExiste: QueryResult = await connectionDB.query(
+  /*const orderIdExiste: QueryResult = await connectionDB.query(
     "SELECT id FROM orders WHERE id=$1;",
     [id]
-  );
+  );*/
+  const orderIdExiste = await prisma.orders.findFirst({
+    where: {
+      id: Number(id),
+    },
+  });
 
-  if (orderIdExiste.rowCount === 0) {
+  if (!orderIdExiste) {
     res.status(404).send("Esse pedido não existe!");
     return;
   }
@@ -126,10 +145,11 @@ export async function getOrdersById(req: Request, res: Response) {
   try {
     const ordersArray: OrderType[] = [];
     let objeto: OrderType;
-    const orders: QueryResult = await connectionDB.query(
+    let orders;
+    /*const orders: QueryResult = await connectionDB.query(
       'SELECT clients.*, pizzas.*, clients.id AS "clientId", clients.name AS "clientName", pizzas.*, orders.id AS "orderId", orders."createdAt", orders.quantity, orders."totalPrice" FROM orders JOIN clients ON orders."clientId" = clients.id JOIN pizzas ON orders."pizzaId" = pizzas.id WHERE orders.id = $1;',
       [id]
-    );
+    );*/
     for (let count = 0; count < orders.rowCount; count++) {
       objeto = {
         client: {
