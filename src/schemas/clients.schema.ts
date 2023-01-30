@@ -5,3 +5,4 @@ export const clientsSchema = joi.object({
     address: joi.string().required(),
     phone: joi.string().required().min(10).max(11)
 })
+
